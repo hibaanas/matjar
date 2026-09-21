@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LUMORA — Wear the World</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+/* ============================= VARIABLES ============================= */
+:root{
+  --primary:#6C63FF;
+  --secondary:#8A7CFF;
+  --accent:#FF6B81;
+  --bg-light:#F8F9FC;
+  --bg-dark:#111827;
+  --card-light:#ffffff;
+  --card-dark:#1a2233;
+  --text-light:#1c1d2b;
+  --text-dark:#eef0fb;
+  --muted-light:#6b7280;
+  --muted-dark:#9aa3b8;
+  --border-light: rgba(108,99,255,0.15);
+  --border-dark: rgba(138,124,255,0.25);
+  --shadow: 0 10px 30px rgba(108,99,255,0.15);
+  --radius: 18px;
+  --transition: .4s cubic-bezier(.4,0,.2,1);
+}
+[data-theme="dark"]{
+  --bg-body: var(--bg-dark);
+  --card: var(--card-dark);
+  --text: var(--text-dark);
+  --muted: var(--muted-dark);
+  --border: var(--border-dark);
+  --nav-bg: rgba(17,24,39,0.65);
+}
+[data-theme="light"]{
+  --bg-body: var(--bg-light);
+  --card: var(--card-light);
+  --text: var(--text-light);
+  --muted: var(--muted-light);
+  --border: var(--border-light);
+  --nav-bg: rgba(255,255,255,0.65);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:'Poppins',sans-serif;
+  background:var(--bg-body);
+  color:var(--text);
+  transition:background var(--transition), color var(--transition);
+  overflow-x:hidden;
+}
+img{max-width:100%;display:block;}
+a{text-decoration:none;color:inherit;}
+ul{list-style:none;}
+button{font-family:inherit;cursor:pointer;border:none;outline:none;background:none;}
+.container{width:100%;max-width:1240px;margin:0 auto;padding:0 24px;}
+::selection{background:var(--primary);color:#fff;}
+
+/* ============================= SCROLLBAR ============================= */
+::-webkit-scrollbar{width:9px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:linear-gradient(var(--primary),var(--accent));border-radius:10px;}
+
+/* ============================= UTILITIES / ANIMATIONS ============================= */
+.reveal{opacity:0;transform:translateY(40px);transition:opacity .8s ease, transform .8s ease;}
+.reveal.in{opacity:1;transform:translateY(0);}
+.reveal-left{opacity:0;transform:translateX(-60px);transition:opacity .8s ease, transform .8s ease;}
+.reveal-left.in{opacity:1;transform:translateX(0);}
+.reveal-right{opacity:0;transform:translateX(60px);transition:opacity .8s ease, transform .8s ease;}
+.reveal-right.in{opacity:1;transform:translateX(0);}
+
+@keyframes float{
+  0%,100%{transform:translateY(0) rotate(0deg);}
+  50%{transform:translateY(-22px) rotate(6deg);}
+}
+@keyframes floatSlow{
+  0%,100%{transform:translateY(0) rotate(0deg);}
+  50%{transform:translateY(-14px) rotate(-4deg);}
+}
+@keyframes pulse{
+  0%,100%{transform:scale(1);}
+  50%{transform:scale(1.08);}
+}
+@keyframes gradientShift{
+  0%{background-position:0% 50%;}
+  50%{background-position:100% 50%;}
+  100%{background-position:0% 50%;}
+}
+@keyframes spinSlow{ to{ transform:rotate(360deg); } }
+@keyframes zoomHero{
+  0%{transform:scale(1.15);}
+  100%{transform:scale(1);}
+}
+@keyframes bounceDown{
+  0%,100%{transform:translateY(0);opacity:1;}
+  50%{transform:translateY(12px);opacity:.5;}
+}
+@keyframes fadeIn{ from{opacity:0;} to{opacity:1;} }
+@keyframes scaleIn{ from{opacity:0;transform:scale(.85);} to{opacity:1;transform:scale(1);} }
+@keyframes ripple{
+  to{ transform:scale(3); opacity:0; }
+}
+@keyframes heartPop{
+  0%{transform:scale(1);}
+  40%{transform:scale(1.5);}
+  100%{transform:scale(1);}
+}
+
+/* ============================= NAVBAR ============================= */
+.navbar{
+  position:fixed;top:0;left:0;width:100%;z-index:1000;
+  padding:18px 0;
+  background:var(--nav-bg);
+  backdrop-filter:blur(16px);
+  -webkit-backdrop-filter:blur(16px);
+  border-bottom:1px solid transparent;
+  transition:all var(--transition);
+}
+.navbar.scrolled{
+  padding:12px 0;
+  box-shadow:0 8px 30px rgba(0,0,0,0.1);
+  border-bottom:1px solid var(--border);
+}
+.nav-inner{display:flex;align-items:center;justify-content:space-between;}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.5rem;}
+.brand i{
+  background:linear-gradient(135deg,var(--primary),var(--accent));
+  width:42px;height:42px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;color:#fff;
+  animation:spinSlow 8s linear infinite;
+}
+.brand span{background:linear-gradient(135deg,var(--primary),var(--accent));-webkit-background-clip:text;background-clip:text;color:transparent;}
+.nav-links{display:flex;align-items:center;gap:34px;}
+.nav-links a{
+  position:relative;font-weight:500;font-size:.98rem;padding:6px 0;
+  transition:color .3s;
+}
+.nav-links a::after{
+  content:'';position:absolute;bottom:-2px;left:0;width:0;height:2px;
+  background:linear-gradient(90deg,var(--primary),var(--accent));
+  transition:width .35s ease;
+}
+.nav-links a:hover::after, .nav-links a.active::after{width:100%;}
+.nav-links a:hover{color:var(--primary);}
+.nav-actions{display:flex;align-items:center;gap:16px;}
+.theme-toggle{
+  width:46px;height:46px;border-radius:50%;
+  background:var(--card);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;font-size:1.05rem;
+  transition:transform .4s ease, background .3s;
+}
+.theme-toggle:hover{transform:rotate(20deg) scale(1.1);}
+.burger{display:none;font-size:1.4rem;}
+
+/* ============================= BUTTONS ============================= */
+.btn{
+  position:relative;overflow:hidden;
+  display:inline-flex;align-items:center;gap:8px;
+  padding:15px 34px;border-radius:50px;font-weight:600;font-size:.95rem;
+  transition:transform .35s ease, box-shadow .35s ease;
+}
+.btn-primary{
+  background:linear-gradient(120deg,var(--primary),var(--accent),var(--secondary));
+  background-size:200% 200%;
+  animation:gradientShift 5s ease infinite;
+  color:#fff;
+  box-shadow:0 10px 25px rgba(108,99,255,.4);
+}
+.btn-primary:hover{transform:translateY(-4px) scale(1.03);box-shadow:0 16px 32px rgba(255,107,129,.4);}
+.btn-outline{
+  background:transparent;color:var(--text);border:2px solid var(--border);
+  backdrop-filter:blur(6px);
+}
+.btn-outline:hover{border-color:var(--primary);color:var(--primary);transform:translateY(-4px);}
+.ripple-span{
+  position:absolute;border-radius:50%;
+  background:rgba(255,255,255,0.55);
+  transform:scale(0);
+  animation:ripple .6s linear;
+  pointer-events:none;
+}
+
+/* ============================= HERO ============================= */
+.hero{
+  position:relative;min-height:100vh;display:flex;align-items:center;
+  overflow:hidden;padding-top:80px;
+}
+.hero-bg{
+  position:absolute;inset:0;
+  background:url('https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?q=80&w=1740&auto=format&fit=crop') center/cover no-repeat;
+  animation:zoomHero 18s ease-in-out infinite alternate;
+}
+.hero-overlay{
+  position:absolute;inset:0;
+  background:linear-gradient(120deg, rgba(17,10,50,.85), rgba(108,99,255,.55) 55%, rgba(255,107,129,.45));
+}
+.hero-content{position:relative;z-index:2;color:#fff;max-width:680px;}
+.hero-eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:8px 18px;border-radius:50px;font-size:.82rem;font-weight:600;
+  background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.3);
+  backdrop-filter:blur(8px);margin-bottom:22px;
+  animation:fadeIn 1.2s ease;
+}
+.hero h1{
+  font-size:clamp(2.6rem,6vw,4.6rem);font-weight:800;line-height:1.08;margin-bottom:20px;
+  animation:fadeIn 1.4s ease;
+}
+.hero h1 em{
+  font-style:normal;
+  background:linear-gradient(120deg,#ffd1da,#c9c3ff);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.hero p{
+  font-size:1.15rem;color:rgba(255,255,255,.85);max-width:520px;margin-bottom:38px;
+  animation:fadeIn 1.7s ease;
+}
+.hero-buttons{display:flex;gap:18px;flex-wrap:wrap;animation:fadeIn 2s ease;}
+.floating-shape{
+  position:absolute;border-radius:50%;
+  background:linear-gradient(135deg,var(--primary),var(--accent));
+  opacity:.35;filter:blur(2px);
+}
+.shape1{width:130px;height:130px;top:18%;right:12%;animation:float 7s ease-in-out infinite;}
+.shape2{width:80px;height:80px;bottom:22%;right:26%;animation:floatSlow 5.5s ease-in-out infinite;}
+.shape3{width:60px;height:60px;top:60%;right:6%;animation:float 6s ease-in-out infinite reverse;}
+.scroll-indicator{
+  position:absolute;bottom:34px;left:50%;transform:translateX(-50%);
+  color:#fff;display:flex;flex-direction:column;align-items:center;gap:8px;
+  font-size:.78rem;letter-spacing:2px;text-transform:uppercase;z-index:3;
+}
+.scroll-indicator i{animation:bounceDown 1.8s ease-in-out infinite;font-size:1.2rem;}
+
+/* ============================= ABOUT ============================= */
+.about{padding:120px 0;position:relative;}
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:70px;align-items:center;}
+.about-imgs{position:relative;height:460px;}
+.about-imgs img{
+  position:absolute;border-radius:22px;object-fit:cover;box-shadow:var(--shadow);
+}
+.about-imgs .img1{width:65%;height:78%;top:0;left:0;z-index:2;}
+.about-imgs .img2{width:55%;height:60%;bottom:0;right:0;z-index:1;border:8px solid var(--bg-body);}
+.section-tag{
+  display:inline-flex;align-items:center;gap:8px;color:var(--primary);font-weight:700;
+  font-size:.85rem;letter-spacing:2px;text-transform:uppercase;margin-bottom:16px;
+}
+.about h2, .products-header h2, .contact-header h2{
+  font-size:clamp(2rem,4vw,2.8rem);font-weight:800;margin-bottom:22px;line-height:1.2;
+}
+.about p{color:var(--muted);font-size:1.05rem;line-height:1.85;margin-bottom:16px;}
+.about-stats{display:flex;gap:40px;margin-top:34px;flex-wrap:wrap;}
+.stat h3{font-size:2.1rem;font-weight:800;
+  background:linear-gradient(120deg,var(--primary),var(--accent));
+  -webkit-background-clip:text;background-clip:text;color:transparent;}
+.stat span{color:var(--muted);font-size:.9rem;}
+
+/* ============================= PRODUCTS ============================= */
+.products{padding:100px 0;background:var(--card);transition:background var(--transition);}
+.products-header{text-align:center;max-width:600px;margin:0 auto 60px;}
+.products-header p{color:var(--muted);font-size:1.05rem;}
+.product-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:30px;
+}
+.product-card{
+  background:var(--bg-body);border-radius:var(--radius);overflow:hidden;
+  border:1px solid var(--border);position:relative;cursor:pointer;
+  transition:transform .45s ease, box-shadow .45s ease, border-color .45s ease;
+}
+.product-card:hover{
+  transform:translateY(-12px);
+  box-shadow:0 22px 45px rgba(108,99,255,.28), 0 0 0 1px var(--primary);
+}
+.product-media{position:relative;height:280px;overflow:hidden;}
+.product-media img{width:100%;height:100%;object-fit:cover;transition:transform .6s ease;}
+.product-card:hover .product-media img{transform:scale(1.12);}
+.badge-discount{
+  position:absolute;top:14px;left:14px;background:var(--accent);color:#fff;
+  padding:6px 12px;border-radius:50px;font-size:.75rem;font-weight:700;
+  box-shadow:0 4px 12px rgba(255,107,129,.5);
+}
+.fav-btn{
+  position:absolute;top:14px;right:14px;width:38px;height:38px;border-radius:50%;
+  background:rgba(255,255,255,.85);color:var(--accent);display:flex;align-items:center;justify-content:center;
+  transition:transform .3s;
+}
+.fav-btn.active i{animation:heartPop .4s ease;}
+.fav-btn.active{color:#fff;background:var(--accent);}
+.product-info{padding:20px;}
+.product-cat{color:var(--primary);font-size:.75rem;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;}
+.product-info h4{font-size:1.1rem;margin:8px 0 6px;font-weight:600;}
+.stars{color:#ffb400;font-size:.85rem;margin-bottom:10px;}
+.stars span{color:var(--muted);margin-left:6px;}
+.price-row{display:flex;align-items:center;gap:10px;}
+.price-new{font-size:1.2rem;font-weight:800;color:var(--primary);}
+.price-old{font-size:.9rem;color:var(--muted);text-decoration:line-through;}
+
+/* ============================= MODAL (PRODUCT) ============================= */
+.modal-overlay{
+  position:fixed;inset:0;background:rgba(10,10,20,.6);backdrop-filter:blur(10px);
+  display:flex;align-items:center;justify-content:center;z-index:3000;
+  opacity:0;visibility:hidden;transition:opacity .4s ease, visibility .4s ease;padding:20px;
+}
+.modal-overlay.open{opacity:1;visibility:visible;}
+.modal-box{
+  background:var(--card);border-radius:24px;max-width:920px;width:100%;max-height:88vh;overflow-y:auto;
+  display:grid;grid-template-columns:1fr 1fr;transform:scale(.85);opacity:0;transition:transform .4s ease, opacity .4s ease;
+  border:1px solid var(--border);position:relative;
+}
+.modal-overlay.open .modal-box{transform:scale(1);opacity:1;}
+.modal-close{
+  position:absolute;top:16px;right:16px;width:40px;height:40px;border-radius:50%;
+  background:var(--bg-body);display:flex;align-items:center;justify-content:center;z-index:5;
+  transition:transform .3s;
+}
+.modal-close:hover{transform:rotate(90deg);color:var(--accent);}
+.modal-img{height:100%;min-height:340px;}
+.modal-img img{width:100%;height:100%;object-fit:cover;}
+.modal-info{padding:34px;}
+.modal-info .product-cat{margin-bottom:8px;display:block;}
+.modal-info h3{font-size:1.6rem;margin-bottom:8px;}
+.modal-info .desc{color:var(--muted);font-size:.95rem;line-height:1.7;margin:14px 0;}
+.modal-price{display:flex;align-items:center;gap:12px;margin:14px 0;}
+.modal-price .price-new{font-size:1.7rem;}
+.option-group{margin:16px 0;}
+.option-group h5{font-size:.85rem;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:10px;}
+.swatches{display:flex;gap:10px;flex-wrap:wrap;}
+.swatch{
+  width:30px;height:30px;border-radius:50%;border:2px solid var(--border);cursor:pointer;transition:transform .25s;
+}
+.swatch:hover, .swatch.sel{transform:scale(1.18);border-color:var(--primary);}
+.size-box{
+  padding:8px 14px;border-radius:10px;border:1px solid var(--border);font-size:.85rem;font-weight:600;cursor:pointer;transition:all .25s;
+}
+.size-box:hover, .size-box.sel{background:var(--primary);color:#fff;border-color:var(--primary);}
+.meta-row{display:flex;gap:22px;margin:18px 0;flex-wrap:wrap;font-size:.85rem;color:var(--muted);}
+.meta-row div{display:flex;align-items:center;gap:6px;}
+.modal-actions{display:flex;gap:14px;margin-top:22px;flex-wrap:wrap;}
+
+/* ============================= CONTACT ============================= */
+.contact{padding:110px 0;}
+.contact-header{text-align:center;max-width:600px;margin:0 auto 60px;}
+.contact-header p{color:var(--muted);}
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:60px;}
+.contact-form{background:var(--card);padding:40px;border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow);}
+.form-group{margin-bottom:20px;}
+.form-group label{font-size:.85rem;font-weight:600;margin-bottom:8px;display:block;}
+.form-group input, .form-group textarea{
+  width:100%;padding:14px 16px;border-radius:12px;border:1px solid var(--border);
+  background:var(--bg-body);color:var(--text);font-family:inherit;font-size:.95rem;
+  transition:border-color .3s, box-shadow .3s;
+}
+.form-group input:focus, .form-group textarea:focus{
+  outline:none;border-color:var(--primary);box-shadow:0 0 0 4px rgba(108,99,255,.15);
+}
+.contact-info-list{display:flex;flex-direction:column;gap:26px;}
+.info-item{display:flex;gap:18px;align-items:flex-start;}
+.info-icon{
+  width:54px;height:54px;border-radius:16px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--primary),var(--accent));
+  display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.2rem;
+}
+.info-item h5{margin-bottom:4px;}
+.info-item p{color:var(--muted);font-size:.92rem;}
+.form-msg{margin-top:14px;font-size:.9rem;color:var(--primary);font-weight:600;display:none;}
+
+/* ============================= FOOTER ============================= */
+footer{background:var(--bg-dark);color:#dfe2f0;padding:70px 0 26px;}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:50px;margin-bottom:50px;}
+.footer-brand .brand{color:#fff;}
+footer p{color:#9aa3c0;font-size:.92rem;margin-top:14px;line-height:1.7;max-width:320px;}
+.social-icons{display:flex;gap:12px;margin-top:20px;}
+.social-icons a{
+  width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.08);
+  display:flex;align-items:center;justify-content:center;transition:all .3s;
+}
+.social-icons a:hover{background:linear-gradient(135deg,var(--primary),var(--accent));transform:translateY(-4px);}
+.footer-col h5{font-size:1rem;margin-bottom:20px;color:#fff;}
+.footer-col ul li{margin-bottom:12px;}
+.footer-col ul li a{color:#9aa3c0;font-size:.92rem;transition:color .3s;}
+.footer-col ul li a:hover{color:var(--accent);padding-left:4px;}
+.footer-bottom{border-top:1px solid rgba(255,255,255,.08);padding-top:22px;text-align:center;font-size:.85rem;color:#8188a8;}
+
+/* ============================= FLOATING BUTTONS ============================= */
+.faq-fab, .top-fab{
+  position:fixed;right:26px;width:58px;height:58px;border-radius:50%;z-index:900;
+  background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:1.3rem;
+  box-shadow:0 10px 25px rgba(108,99,255,.45);transition:transform .35s ease, opacity .35s ease, visibility .35s;
+}
+.faq-fab{bottom:26px;animation:pulse 2.6s ease-in-out infinite;}
+.faq-fab:hover{transform:scale(1.1) rotate(-8deg);}
+.top-fab{bottom:96px;opacity:0;visibility:hidden;transform:translateY(20px);}
+.top-fab.show{opacity:1;visibility:visible;transform:translateY(0);}
+
+/* FAQ modal */
+.faq-box{
+  background:var(--card);border-radius:22px;max-width:520px;width:100%;padding:34px;
+  transform:scale(.85);opacity:0;transition:transform .4s ease, opacity .4s ease;border:1px solid var(--border);
+  position:relative;max-height:85vh;overflow-y:auto;
+}
+.modal-overlay.open .faq-box{transform:scale(1);opacity:1;}
+.faq-box h3{margin-bottom:22px;font-size:1.4rem;}
+.faq-item{border-bottom:1px solid var(--border);}
+.faq-q{
+  padding:16px 0;display:flex;align-items:center;justify-content:space-between;font-weight:600;font-size:.98rem;
+}
+.faq-q i{transition:transform .35s ease;color:var(--primary);}
+.faq-item.open .faq-q i{transform:rotate(45deg);}
+.faq-a{max-height:0;overflow:hidden;transition:max-height .4s ease, padding .4s ease;color:var(--muted);font-size:.9rem;line-height:1.7;}
+.faq-item.open .faq-a{max-height:200px;padding-bottom:16px;}
+
+/* ============================= RESPONSIVE ============================= */
+@media(max-width:960px){
+  .about-grid, .contact-grid{grid-template-columns:1fr;}
+  .footer-grid{grid-template-columns:1fr 1fr;}
+  .about-imgs{height:360px;margin-bottom:20px;}
+}
+@media(max-width:780px){
+  .nav-links{position:fixed;top:0;right:-100%;width:75%;max-width:320px;height:100vh;
+    background:var(--card);flex-direction:column;justify-content:center;gap:30px;
+    transition:right .45s ease;box-shadow:-10px 0 30px rgba(0,0,0,.15);}
+  .nav-links.open{right:0;}
+  .burger{display:block;}
+  .modal-box{grid-template-columns:1fr;}
+  .modal-img{min-height:220px;}
+  .footer-grid{grid-template-columns:1fr;text-align:left;}
+}
+@media(max-width:480px){
+  .hero-buttons{flex-direction:column;}
+  .about-stats{gap:24px;}
+}
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:.001s !important; transition-duration:.001s !important;}
+}
+</style>
+</head>
+<body data-theme="light">
+
+<!-- ============================= NAVBAR ============================= -->
+<nav class="navbar" id="navbar">
+  <div class="container nav-inner">
+    <a href="#home" class="brand"><i class="fa-solid fa-bag-shopping"></i>LUM<span>ORA</span></a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#home" class="nav-link active">Home</a></li>
+      <li><a href="#products" class="nav-link">Products</a></li>
+      <li><a href="#contact" class="nav-link">Contact</a></li>
+    </ul>
+    <div class="nav-actions">
+      <button class="theme-toggle" id="themeToggle"><i class="fa-solid fa-moon"></i></button>
+      <button class="burger" id="burger"><i class="fa-solid fa-bars"></i></button>
+    </div>
+  </div>
+</nav>
+
+<!-- ============================= HERO ============================= -->
+<section class="hero" id="home">
+  <div class="hero-bg"></div>
+  <div class="hero-overlay"></div>
+  <div class="floating-shape shape1"></div>
+  <div class="floating-shape shape2"></div>
+  <div class="floating-shape shape3"></div>
+  <div class="container hero-content">
+    <span class="hero-eyebrow"><i class="fa-solid fa-sparkles"></i> New Season Collection</span>
+    <h1>Wear the <em>world's</em> best style, delivered to you</h1>
+    <p>Curated fashion, footwear and accessories from independent makers across 40+ countries — shipped worldwide, priced fairly.</p>
+    <div class="hero-buttons">
+      <a href="#products" class="btn btn-primary">Shop Now <i class="fa-solid fa-arrow-right"></i></a>
+      <a href="#about" class="btn btn-outline">Learn More</a>
+    </div>
+  </div>
+  <div class="scroll-indicator">Scroll<i class="fa-solid fa-chevron-down"></i></div>
+</section>
+
+<!-- ============================= ABOUT ============================= -->
+<section class="about" id="about">
+  <div class="container about-grid">
+    <div class="about-imgs reveal-left">
+      <img class="img1" src="https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=1000&auto=format&fit=crop" alt="Store interior">
+      <img class="img2" src="https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=1000&auto=format&fit=crop" alt="Fashion rack">
+    </div>
+    <div class="reveal-right">
+      <span class="section-tag"><i class="fa-solid fa-globe"></i> About Lumora</span>
+      <h2>A global store built for the way you actually shop</h2>
+      <p>Lumora started as a small studio sourcing hand-picked pieces from independent designers, and grew into a home for fashion lovers across the globe. Every item on our shelves is chosen for quality, comfort, and character — never mass-produced filler.</p>
+      <p>We work directly with over 300 makers and factories, cutting out unnecessary middlemen so you get premium quality at honest prices, with checkout-to-doorstep delivery in days, not weeks.</p>
+      <div class="about-stats">
+        <div class="stat"><h3>2.4M+</h3><span>Happy customers</span></div>
+        <div class="stat"><h3>300+</h3><span>Partner brands</span></div>
+        <div class="stat"><h3>40+</h3><span>Countries served</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================= PRODUCTS ============================= -->
+<section class="products" id="products">
+  <div class="container">
+    <div class="products-header reveal">
+      <span class="section-tag"><i class="fa-solid fa-bag-shopping"></i> Shop the Edit</span>
+      <h2>Trending right now</h2>
+      <p>Hand-picked bestsellers across clothing, footwear and accessories — updated weekly.</p>
+    </div>
+    <div class="product-grid" id="productGrid"></div>
+  </div>
+</section>
+
+<!-- ============================= CONTACT ============================= -->
+<section class="contact" id="contact">
+  <div class="container">
+    <div class="contact-header reveal">
+      <span class="section-tag"><i class="fa-solid fa-envelope"></i> Get in touch</span>
+      <h2>We'd love to hear from you</h2>
+      <p>Questions about an order, a partnership, or just want to say hi? Send us a message.</p>
+    </div>
+    <div class="contact-grid">
+      <form class="contact-form reveal-left" id="contactForm">
+        <div class="form-group">
+          <label>Full Name</label>
+          <input type="text" placeholder="Jane Doe" required>
+        </div>
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" placeholder="jane@email.com" required>
+        </div>
+        <div class="form-group">
+          <label>Phone Number</label>
+          <input type="tel" placeholder="+1 (555) 000-0000">
+        </div>
+        <div class="form-group">
+          <label>Message</label>
+          <textarea rows="4" placeholder="Tell us how we can help..." required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;">Send Message <i class="fa-solid fa-paper-plane"></i></button>
+        <div class="form-msg" id="formMsg">Thanks! Your message has been sent — we'll reply within 24 hours.</div>
+      </form>
+      <div class="contact-info-list reveal-right">
+        <div class="info-item">
+          <div class="info-icon"><i class="fa-solid fa-location-dot"></i></div>
+          <div><h5>Our Address</h5><p>128 Meridian Avenue, Suite 400, San Francisco, CA 94103</p></div>
+        </div>
+        <div class="info-item">
+          <div class="info-icon"><i class="fa-solid fa-envelope-open-text"></i></div>
+          <div><h5>Email Us</h5><p>support@lumorastore.com</p></div>
+        </div>
+        <div class="info-item">
+          <div class="info-icon"><i class="fa-solid fa-phone"></i></div>
+          <div><h5>Call Us</h5><p>+1 (800) 555-0199</p></div>
+        </div>
+        <div class="info-item">
+          <div class="info-icon"><i class="fa-solid fa-clock"></i></div>
+          <div><h5>Working Hours</h5><p>Mon – Fri: 9AM – 7PM · Sat: 10AM – 4PM</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================= FOOTER ============================= -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <a href="#home" class="brand"><i class="fa-solid fa-bag-shopping"></i>LUM<span style="background:linear-gradient(135deg,var(--secondary),var(--accent));-webkit-background-clip:text;background-clip:text;color:transparent;">ORA</span></a>
+        <p>Premium global fashion, curated for the way modern life moves. Quality pieces, honest prices, worldwide delivery.</p>
+        <div class="social-icons">
+          <a href="#"><i class="fa-brands fa-instagram"></i></a>
+          <a href="#"><i class="fa-brands fa-tiktok"></i></a>
+          <a href="#"><i class="fa-brands fa-x-twitter"></i></a>
+          <a href="#"><i class="fa-brands fa-pinterest"></i></a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h5>Quick Links</h5>
+        <ul>
+          <li><a href="#home">Home</a></li>
+          <li><a href="#about">About Store</a></li>
+          <li><a href="#products">Products</a></li>
+          <li><a href="#contact">Contact</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h5>Support</h5>
+        <ul>
+          <li><a href="#">Shipping Info</a></li>
+          <li><a href="#">Returns & Exchanges</a></li>
+          <li><a href="#">Track Order</a></li>
+          <li><a href="#">Size Guide</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">© 2026 Lumora Store. All rights reserved.</div>
+  </div>
+</footer>
+
+<!-- ============================= PRODUCT MODAL ============================= -->
+<div class="modal-overlay" id="productModal">
+  <div class="modal-box">
+    <button class="modal-close" id="closeProductModal"><i class="fa-solid fa-xmark"></i></button>
+    <div class="modal-img"><img id="modalImg" src="" alt="Product"></div>
+    <div class="modal-info">
+      <span class="product-cat" id="modalCat"></span>
+      <h3 id="modalName"></h3>
+      <div class="stars" id="modalStars"></div>
+      <p class="desc" id="modalDesc"></p>
+      <div class="modal-price">
+        <span class="price-new" id="modalPriceNew"></span>
+        <span class="price-old" id="modalPriceOld"></span>
+        <span class="badge-discount" id="modalDiscount" style="position:static;"></span>
+      </div>
+      <div class="option-group">
+        <h5>Color</h5>
+        <div class="swatches" id="modalColors"></div>
+      </div>
+      <div class="option-group">
+        <h5>Size</h5>
+        <div class="swatches" id="modalSizes"></div>
+      </div>
+      <div class="meta-row">
+        <div><i class="fa-solid fa-truck"></i> Free shipping, 3–6 days</div>
+        <div><i class="fa-solid fa-circle-check" style="color:#2ecc71;"></i> <span id="modalStock">In stock</span></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-primary" id="buyNowBtn">Buy Now</button>
+        <button class="btn btn-outline" id="addCartBtn">Add to Cart <i class="fa-solid fa-cart-plus"></i></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================= FAQ MODAL ============================= -->
+<div class="modal-overlay" id="faqModal">
+  <div class="faq-box">
+    <button class="modal-close" id="closeFaqModal"><i class="fa-solid fa-xmark"></i></button>
+    <h3><i class="fa-solid fa-circle-question"></i> Frequently Asked Questions</h3>
+    <div id="faqList"></div>
+  </div>
+</div>
+
+<!-- Floating buttons -->
+<button class="faq-fab" id="faqFab"><i class="fa-solid fa-comment-dots"></i></button>
+<button class="top-fab" id="topFab"><i class="fa-solid fa-arrow-up"></i></button>
+
+<script>
+/* ============================= DATA ============================= */
+const products = [
+  {name:"Oversized Hoodie", cat:"Hoodies", price:39.99, old:64.99, rating:4.6, reviews:812, img:"https://images.unsplash.com/photo-1556821840-3a63f95609a7?q=80&w=800&auto=format&fit=crop", desc:"A heavyweight cotton-blend hoodie with a relaxed, oversized fit. Brushed fleece interior keeps you warm without the bulk.", colors:["#1c1d2b","#8A7CFF","#c9c3ff"], sizes:["S","M","L","XL"]},
+  {name:"Retro Runner Sneakers", cat:"Sneakers", price:54.5, old:89.0, rating:4.8, reviews:1204, img:"https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=800&auto=format&fit=crop", desc:"Lightweight runners with breathable mesh uppers and a cushioned sole built for all-day comfort.", colors:["#ffffff","#FF6B81","#111827"], sizes:["38","39","40","41","42"]},
+  {name:"Classic Denim Jacket", cat:"Jackets", price:47.0, old:79.0, rating:4.5, reviews:530, img:"https://images.unsplash.com/photo-1601333144130-8cbb312386b6?q=80&w=800&auto=format&fit=crop", desc:"A timeless denim jacket with a tailored cut, button front, and durable stitching that only gets better with age.", colors:["#3b4a6b","#111827"], sizes:["S","M","L","XL"]},
+  {name:"Essential Cotton Tee", cat:"T-Shirts", price:14.99, old:24.99, rating:4.7, reviews:2103, img:"https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=800&auto=format&fit=crop", desc:"Soft, breathable 100% combed cotton tee with a clean crew neck — the everyday layering essential.", colors:["#ffffff","#1c1d2b","#8A7CFF"], sizes:["S","M","L","XL","XXL"]},
+  {name:"Slim Fit Jeans", cat:"Jeans", price:36.0, old:58.0, rating:4.4, reviews:640, img:"https://images.unsplash.com/photo-1541099649105-f69ad21f3246?q=80&w=800&auto=format&fit=crop", desc:"Stretch-denim slim fit jeans with a modern taper and reinforced pockets for everyday durability.", colors:["#2b3a55","#111827"], sizes:["28","30","32","34","36"]},
+  {name:"Satin Wrap Dress", cat:"Dresses", price:42.5, old:72.0, rating:4.9, reviews:398, img:"https://images.unsplash.com/photo-1595777457583-95e059d581b8?q=80&w=800&auto=format&fit=crop", desc:"A flowing satin wrap dress with an adjustable tie waist — effortlessly elegant from day to evening.", colors:["#FF6B81","#111827","#8A7CFF"], sizes:["XS","S","M","L"]},
+  {name:"Structured Tote Bag", cat:"Bags", price:32.0, old:49.0, rating:4.6, reviews:451, img:"https://images.unsplash.com/photo-1553062407-98eeb64c6a62?q=80&w=800&auto=format&fit=crop", desc:"A structured vegan-leather tote with reinforced handles and an interior zip pocket for daily essentials.", colors:["#6b4a30","#1c1d2b","#c9a97a"], sizes:["One Size"]},
+  {name:"Minimalist Steel Watch", cat:"Watches", price:59.0, old:99.0, rating:4.7, reviews:915, img:"https://images.unsplash.com/photo-1524592094714-0f0654e20314?q=80&w=800&auto=format&fit=crop", desc:"A slim stainless-steel watch with a sapphire-coated face and a mesh strap — quietly elegant.", colors:["#c0c0c0","#d4af37","#1c1d2b"], sizes:["One Size"]},
+  {name:"Signature Eau de Parfum", cat:"Perfume", price:44.0, old:70.0, rating:4.8, reviews:670, img:"https://images.unsplash.com/photo-1541643600914-78b084683601?q=80&w=800&auto=format&fit=crop", desc:"A warm, woody fragrance with notes of amber and citrus, long-lasting and beautifully bottled.", colors:["#c9a97a"], sizes:["50ml","100ml"]},
+  {name:"Polarized Sunglasses", cat:"Sunglasses", price:22.0, old:38.0, rating:4.5, reviews:512, img:"https://images.unsplash.com/photo-1572635196237-14b3f281503f?q=80&w=800&auto=format&fit=crop", desc:"UV400 polarized lenses in a lightweight acetate frame — classic shape, all-day comfort.", colors:["#1c1d2b","#6b4a30"], sizes:["One Size"]},
+  {name:"Wireless Over-Ear Headphones", cat:"Headphones", price:68.0, old:110.0, rating:4.9, reviews:1340, img:"https://images.unsplash.com/photo-1505740420928-5e560c06d30e?q=80&w=800&auto=format&fit=crop", desc:"Active noise-cancelling over-ear headphones with 40-hour battery life and plush memory-foam pads.", colors:["#1c1d2b","#ffffff"], sizes:["One Size"]},
+  {name:"Classic Baseball Cap", cat:"Caps", price:16.5, old:27.0, rating:4.6, reviews:288, img:"https://images.unsplash.com/photo-1588850561407-ed78c282e89b?q=80&w=800&auto=format&fit=crop", desc:"A structured cotton-twill cap with an adjustable strap back — a wardrobe staple that goes with everything.", colors:["#111827","#8A7CFF","#FF6B81"], sizes:["One Size"]}
+];
+
+/* ============================= RENDER PRODUCTS ============================= */
+const grid = document.getElementById('productGrid');
+products.forEach((p, i) => {
+  const discount = Math.round(100 - (p.price/p.old)*100);
+  const fullStars = Math.floor(p.rating);
+  let starsHtml = '';
+  for(let s=0;s<5;s++){ starsHtml += `<i class="fa-solid fa-star" style="opacity:${s < fullStars ? 1 : .25}"></i>`; }
+  const card = document.createElement('div');
+  card.className = 'product-card reveal';
+  card.innerHTML = `
+    <div class="product-media">
+      <img src="${p.img}" alt="${p.name}" loading="lazy">
+      <span class="badge-discount">-${discount}%</span>
+      <button class="fav-btn" data-idx="${i}"><i class="fa-regular fa-heart"></i></button>
+    </div>
+    <div class="product-info">
+      <span class="product-cat">${p.cat}</span>
+      <h4>${p.name}</h4>
+      <div class="stars">${starsHtml}<span>(${p.reviews})</span></div>
+      <div class="price-row">
+        <span class="price-new">$${p.price.toFixed(2)}</span>
+        <span class="price-old">$${p.old.toFixed(2)}</span>
+      </div>
+    </div>
+  `;
+  card.addEventListener('click', (e)=>{
+    if(e.target.closest('.fav-btn')) return;
+    openProductModal(i);
+  });
+  grid.appendChild(card);
+});
+
+/* Favorite heart toggle */
+grid.addEventListener('click', (e)=>{
+  const favBtn = e.target.closest('.fav-btn');
+  if(!favBtn) return;
+  favBtn.classList.toggle('active');
+  const icon = favBtn.querySelector('i');
+  icon.className = favBtn.classList.contains('active') ? 'fa-solid fa-heart' : 'fa-regular fa-heart';
+});
+
+/* ============================= PRODUCT MODAL ============================= */
+const productModal = document.getElementById('productModal');
+function openProductModal(i){
+  const p = products[i];
+  const discount = Math.round(100 - (p.price/p.old)*100);
+  document.getElementById('modalImg').src = p.img;
+  document.getElementById('modalCat').textContent = p.cat;
+  document.getElementById('modalName').textContent = p.name;
+  document.getElementById('modalDesc').textContent = p.desc;
+  document.getElementById('modalPriceNew').textContent = '$' + p.price.toFixed(2);
+  document.getElementById('modalPriceOld').textContent = '$' + p.old.toFixed(2);
+  document.getElementById('modalDiscount').textContent = '-' + discount + '%';
+  document.getElementById('modalStock').textContent = 'In stock — ships within 24h';
+
+  const fullStars = Math.floor(p.rating);
+  let starsHtml = '';
+  for(let s=0;s<5;s++){ starsHtml += `<i class="fa-solid fa-star" style="opacity:${s < fullStars ? 1 : .25}"></i>`; }
+  starsHtml += `<span>${p.rating} (${p.reviews} reviews)</span>`;
+  document.getElementById('modalStars').innerHTML = starsHtml;
+
+  const colorsEl = document.getElementById('modalColors');
+  colorsEl.innerHTML = '';
+  p.colors.forEach((c,ci)=>{
+    const sw = document.createElement('div');
+    sw.className = 'swatch' + (ci===0 ? ' sel' : '');
+    sw.style.background = c;
+    sw.addEventListener('click', ()=>{
+      colorsEl.querySelectorAll('.swatch').forEach(s=>s.classList.remove('sel'));
+      sw.classList.add('sel');
+    });
+    colorsEl.appendChild(sw);
+  });
+
+  const sizesEl = document.getElementById('modalSizes');
+  sizesEl.innerHTML = '';
+  p.sizes.forEach((s,si)=>{
+    const box = document.createElement('div');
+    box.className = 'size-box' + (si===0 ? ' sel' : '');
+    box.textContent = s;
+    box.addEventListener('click', ()=>{
+      sizesEl.querySelectorAll('.size-box').forEach(b=>b.classList.remove('sel'));
+      box.classList.add('sel');
+    });
+    sizesEl.appendChild(box);
+  });
+
+  productModal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+document.getElementById('closeProductModal').addEventListener('click', ()=>{
+  productModal.classList.remove('open');
+  document.body.style.overflow = '';
+});
+productModal.addEventListener('click', (e)=>{
+  if(e.target === productModal){ productModal.classList.remove('open'); document.body.style.overflow=''; }
+});
+document.getElementById('buyNowBtn').addEventListener('click', ()=>{
+  alert('Thanks for your order! This is a demo store — no real purchase was made.');
+});
+document.getElementById('addCartBtn').addEventListener('click', (e)=>{
+  const original = e.target.innerHTML;
+  e.target.innerHTML = '<i class="fa-solid fa-check"></i> Added!';
+  setTimeout(()=>{ e.target.innerHTML = original; }, 1500);
+});
+
+/* ============================= FAQ ============================= */
+const faqs = [
+  {q:"How do I place an order?", a:"Browse our products, tap any item to view details, choose your color and size, then hit Buy Now or Add to Cart to check out securely."},
+  {q:"What payment methods do you accept?", a:"We accept all major credit and debit cards, PayPal, Apple Pay, and Google Pay at checkout."},
+  {q:"How long does shipping take?", a:"Standard shipping takes 3–6 business days domestically and 7–14 days internationally, with tracking provided for every order."},
+  {q:"What is your return policy?", a:"You can return unused items in original packaging within 30 days of delivery for a full refund."},
+  {q:"How can I contact customer support?", a:"Reach our team anytime via the contact form below, or email support@lumorastore.com — we typically reply within 24 hours."}
+];
+const faqList = document.getElementById('faqList');
+faqs.forEach(f=>{
+  const item = document.createElement('div');
+  item.className = 'faq-item';
+  item.innerHTML = `<div class="faq-q">${f.q} <i class="fa-solid fa-plus"></i></div><div class="faq-a">${f.a}</div>`;
+  item.querySelector('.faq-q').addEventListener('click', ()=>{
+    item.classList.toggle('open');
+  });
+  faqList.appendChild(item);
+});
+
+const faqModal = document.getElementById('faqModal');
+document.getElementById('faqFab').addEventListener('click', ()=>{
+  faqModal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+});
+document.getElementById('closeFaqModal').addEventListener('click', ()=>{
+  faqModal.classList.remove('open');
+  document.body.style.overflow = '';
+});
+faqModal.addEventListener('click', (e)=>{
+  if(e.target === faqModal){ faqModal.classList.remove('open'); document.body.style.overflow=''; }
+});
+
+/* ============================= THEME TOGGLE ============================= */
+const themeToggle = document.getElementById('themeToggle');
+const body = document.body;
+function setTheme(theme){
+  body.setAttribute('data-theme', theme);
+  themeToggle.innerHTML = theme === 'dark' ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-solid fa-moon"></i>';
+  localStorage.setItem('lumora-theme', theme);
+}
+const savedTheme = localStorage.getItem('lumora-theme') || 'light';
+setTheme(savedTheme);
+themeToggle.addEventListener('click', ()=>{
+  const current = body.getAttribute('data-theme');
+  setTheme(current === 'light' ? 'dark' : 'light');
+});
+
+/* ============================= NAVBAR SCROLL / ACTIVE LINK ============================= */
+const navbar = document.getElementById('navbar');
+const navLinks = document.querySelectorAll('.nav-link');
+const topFab = document.getElementById('topFab');
+window.addEventListener('scroll', ()=>{
+  navbar.classList.toggle('scrolled', window.scrollY > 40);
+  topFab.classList.toggle('show', window.scrollY > 500);
+
+  let current = '';
+  document.querySelectorAll('section[id]').forEach(sec=>{
+    const top = sec.offsetTop - 120;
+    if(window.scrollY >= top) current = sec.getAttribute('id');
+  });
+  navLinks.forEach(link=>{
+    link.classList.toggle('active', link.getAttribute('href') === '#' + current);
+  });
+});
+
+topFab.addEventListener('click', ()=>{
+  window.scrollTo({top:0, behavior:'smooth'});
+});
+
+/* Mobile menu */
+const burger = document.getElementById('burger');
+const navLinksBox = document.getElementById('navLinks');
+burger.addEventListener('click', ()=>{
+  navLinksBox.classList.toggle('open');
+  burger.innerHTML = navLinksBox.classList.contains('open') ? '<i class="fa-solid fa-xmark"></i>' : '<i class="fa-solid fa-bars"></i>';
+});
+navLinksBox.querySelectorAll('a').forEach(a=>{
+  a.addEventListener('click', ()=>{
+    navLinksBox.classList.remove('open');
+    burger.innerHTML = '<i class="fa-solid fa-bars"></i>';
+  });
+});
+
+/* ============================= INTERSECTION OBSERVER REVEALS ============================= */
+const observer = new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){
+      entry.target.classList.add('in');
+      observer.unobserve(entry.target);
+    }
+  });
+}, {threshold:0.15});
+document.querySelectorAll('.reveal, .reveal-left, .reveal-right').forEach(el=>observer.observe(el));
+
+/* ============================= CONTACT FORM ============================= */
+document.getElementById('contactForm').addEventListener('submit', (e)=>{
+  e.preventDefault();
+  const msg = document.getElementById('formMsg');
+  msg.style.display = 'block';
+  e.target.reset();
+  setTimeout(()=>{ msg.style.display = 'none'; }, 5000);
+});
+
+/* ============================= BUTTON RIPPLE EFFECT ============================= */
+document.querySelectorAll('.btn').forEach(btn=>{
+  btn.addEventListener('click', function(e){
+    const rect = this.getBoundingClientRect();
+    const span = document.createElement('span');
+    const size = Math.max(rect.width, rect.height);
+    span.className = 'ripple-span';
+    span.style.width = span.style.height = size + 'px';
+    span.style.left = (e.clientX - rect.left - size/2) + 'px';
+    span.style.top = (e.clientY - rect.top - size/2) + 'px';
+    this.appendChild(span);
+    setTimeout(()=> span.remove(), 650);
+  });
+});
+</script>
+</body>
+</html>
